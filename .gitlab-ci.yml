@@ -1,0 +1,51 @@
+stages:
+  - build
+  - deploy
+  - security
+  - monitor
+
+variables:
+  DOCKER_DRIVER: overlay2
+  IMAGE_NAME: "ai_app"
+
+build:
+  stage: build
+  script:
+    - docker build -t $IMAGE_NAME ./src
+  artifacts:
+    paths:
+      - docker-image.tar
+  tags:
+    - docker
+
+deploy:
+  stage: deploy
+  script:
+    - docker-compose up -d
+  only:
+    - main
+
+sonarqube_scan:
+  stage: security
+  image: sonarsource/sonar-scanner-cli
+  script:
+    - sonar-scanner -Dsonar.projectKey=Proyecto4 -Dsonar.sources=./src -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN
+  artifacts:
+    paths:
+      - reports/sonar-report.xml
+
+owasp_zap_scan:
+  stage: security
+  image: owasp/zap2docker-stable
+  script:
+    - zap-baseline.py -t http://app:5000 -r reports/zap-report.html
+  artifacts:
+    paths:
+      - reports/zap-report.html
+
+monitoring:
+  stage: monitor
+  script:
+    - echo "Monitoreo habilitado con Prometheus y Grafana"
+  only:
+    - main

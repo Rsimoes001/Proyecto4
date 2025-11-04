@@ -1,0 +1,13 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Monitoreo Aplicación IA",
+    "panels": [
+      {
+        "type": "graph",
+        "title": "Solicitudes por segundo",
+        "targets": [{"expr": "flask_http_request_total"}]
+      }
+    ]
+  }
+}
