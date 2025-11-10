@@ -1,4 +1,5 @@
 stages:
+  - infrastructure # NUEVA ETAPA
   - build
   - deploy
   - security
@@ -7,6 +8,22 @@ stages:
 variables:
   DOCKER_DRIVER: overlay2
   IMAGE_NAME: "ai_app"
+
+# NUEVO JOB PARA TERRAFORM
+terraform_apply:
+  stage: infrastructure
+  image: hashicorp/terraform:latest # Imagen oficial con Terraform
+  script:
+    - cd terraform
+    - terraform init
+    - terraform validate
+    # Aplicar la configuración. Se usa -auto-approve para la automatización.
+    - terraform apply -auto-approve
+  only:
+    - main # Solo ejecutar al hacer push a la rama principal
+  tags:
+    - docker # Reutilizamos el tag si el runner tiene permisos
+# FIN NUEVO JOB
 
 build:
   stage: build
